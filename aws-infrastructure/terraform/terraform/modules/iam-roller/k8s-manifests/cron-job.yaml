@@ -1,0 +1,35 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: iam-roller
+  namespace: ${namespace}
+spec:
+  schedule: "*/15 * * * *"
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            iam.amazonaws.com/role: ${roller_role_arn}
+        spec:
+          serviceAccountName: iam-roller
+          containers:
+          - name: iam-roller
+            image: misterpib/iam-roller:8
+            args:
+              - --namespace=${namespace}
+              - --name=rolling-iam
+              - --role-arn=${assume_role_arn}
+          restartPolicy: OnFailure
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: nodetype
+                    operator: In
+                    values: ["system"]
+          tolerations:
+          - key: node-role.kubernetes.io/system
+            operator: Exists

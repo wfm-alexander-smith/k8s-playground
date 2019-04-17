@@ -1,0 +1,18 @@
+terragrunt = {
+  terraform {
+    source = "${find_in_parent_folders("modules")}//mgmt-vpc"
+  }
+
+  include = {
+    path = "${find_in_parent_folders()}"
+  }
+}
+
+vpc_cidr_block = "172.63.0.0/16"
+
+ssh_authorized_keys = [
+  "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA5bxCK62mdxBVGULYNnidGrZwts4dKgmd9DwvB9p/+HkfbwPUPy+R+BIyIbZ4u1uB26eW+Jy8OKd+OhYvXzZyIQJq2s0emoaoM9RNjmCA4/bd8gx50tarlj8e8WtQhfgZax9uRpPuCl0+HBe/1HNmu0izAWRvw+g0zkrtbgxj1+I6RXhyoO0hkwDmnZ5QoHStDwOffBLBflI3rkMqlxC8S0xgtWxOqESLDxDnEhfULs+ShdVDjU+7AKspHCTJTPMqcywv/6wcnR5MyHBGiQVxNQidJW2nEIJ9dQR8D4kCgXq2jjE3AxkQlL5xYcAOTnGUaL/x3mESeTtshRYyTds9Ww== pib@Quari",
+  "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDtHrL+5NGhSFwfuJuY5u7C6n2kHV9fi2QVm7oh4zc9hXtEa/IBetlgLG0o5AhjtOeVlNlrxAE/Mizeoi26l+K36CsNkGTOMZdlcCL3jw6BhAh+b/2DQxkhAhSsfbt1xMXtZyKVEPDgR9jFcJQkpO7uFX4KOx9t7dMSoQE0S0ctGM3ZzElkVgCcvDNKGHMNVkOjSLj2aHzJBEsdQRljHVhw1pwQ3AdLzzRurD7ijHiMET0sxP+TGhA4SV0wJrL2CyNnrCyhr9Or+SAxt5C1QOnDBi9Ox31ngJmxakQgSazfZaZgKzMFK6ZCvUq1BcSCMYCd/FEu9Za42aQD/VqdmfEp brian@brian-P65-P67RGRERA",
+  "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDI4eY//l73vpvGU/Z8LNhSHIkMkzXQRfI1+zcmihPCBZ2b5bDqdXdqIzKiahql9QdMz7BiiShngevvTgxYmuPmd1uI6JDMEKuHT2D9NvbETFHkZ8klgG4VowF9/GnYccKNnhQK3kEhPakBYxJ9sP/h1dTV8gPpiW7URfELXmAjzBPnmIlwwHACtDhbwctArouKhtCSFZww+CeABbIGK825Qvb5UuFkRbqv/iEm7Ijkg1DbAzuQGTIPNe6nVM8L5lZe7JehHJE0CilAB2OHefA90jdNhy0u8fLP+4S6hUt2zoXwd6AsOvBSbHs9NIs6Sd/FGDiEwqzPl1/Q3HcqH9iz zeid@dev03",
+  "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5Eb3qWjpY03b0XoxDk32MnYMrgo32g9ka4WxBm6yf5wfFUGSX+2Wf7tNaxI2oO4ZoBl/BSlPylqnpR0AaHGUFM0Au84A21W3bS94wnIlsMAU9tk66dq4EVhss1FgLdC4fqS+jL8vfJ7bqsXhgFbum0/2mzdFVYyQTMZy2mFmtDIeClWq927/qnj6jtqjXjU0Us6aikRJwsCqGS0ituiJ0un6BL9Ly/oEyxynv6wrVYqIEtVekCDgCZZZPNDiNtD86btruu1nMEM3/ApvAPAsZMq//OE4ncAGErQ34Rf4+ugKHAs3zmUSVsqpeTU9IGBJmNo8L6FshsR/36i/G/a8/ amoentmann@AndrewM-L5590W10",
+]

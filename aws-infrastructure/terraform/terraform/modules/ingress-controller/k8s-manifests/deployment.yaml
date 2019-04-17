@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alb-ingress-controller
+  namespace: ${namespace}
+  labels:
+    app: alb-ingress-controller
+    component: controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alb-ingress-controller
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: alb-ingress-controller
+        component: controller
+      annotations:
+        iam.amazonaws.com/role: ${role_name}
+    spec:
+      serviceAccountName: alb-ingress
+      containers:
+        - name: server
+          image: amazon/aws-alb-ingress-controller:v1.1.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - /server
+            - --cluster-name=${cluster_name}
+            - --alb-name-prefix=${cluster_name}
+            - --target-type=ip
+            - --aws-vpc-id=${vpc_id}
+          env:
+            - name: AWS_REGION
+              value: ${aws_region}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+          ports:
+            - containerPort: 10254
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 10254
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 60
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+
+      terminationGracePeriodSeconds: 60
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nodetype
+                operator: In
+                values: ["system"]
+      tolerations:
+      - key: node-role.kubernetes.io/system
+        operator: Exists
