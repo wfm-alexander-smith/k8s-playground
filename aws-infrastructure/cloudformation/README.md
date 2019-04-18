@@ -11,11 +11,12 @@ aws s3 sync ./ s3://development-busycloud/assets
 - Create a stack with the master template
 ```
 aws cloudformation create-stack --stack-name "development-busycloud" --template-url https://s3.amazonaws.com/development-busycloud/assets/templates/amazon-eks-master.template.yaml --capabilities CAPABILITY_IAM --disable-rollback --parameters ParameterKey=AvailabilityZones,ParameterValue='us-east-1b\,us-east-1e\,us-east-1d' ParameterKey=RemoteAccessCIDR,ParameterValue=70.112.246.130/32 ParameterKey=KeyPairName,ParameterValue=busycloud-dev ParameterKey=QSS3BucketName,ParameterValue=development-busycloud ParameterKey=QSS3KeyPrefix,ParameterValue=assets\/ ParameterKey=Cluster,ParameterValue=development ParameterKey=Environment,ParameterValue=dev
+
 ```
 ### Update Template
-
+```
 aws cloudformation update-stack --stack-name "development-busycloud" --template-url https://s3.amazonaws.com/development-busycloud/assets/templates/amazon-eks-master.template.yaml --capabilities CAPABILITY_IAM --parameters ParameterKey=AvailabilityZones,ParameterValue='us-east-1b\,us-east-1e\,us-east-1d' ParameterKey=RemoteAccessCIDR,ParameterValue=70.112.246.130/32 ParameterKey=KeyPairName,ParameterValue=busycloud-dev ParameterKey=QSS3BucketName,ParameterValue=development-busycloud ParameterKey=QSS3KeyPrefix,ParameterValue=assets\/ ParameterKey=Cluster,ParameterValue=development ParameterKey=Environment,ParameterValue=dev
-
+```
 ### Deployed Resources
 
 #### EKS
@@ -24,8 +25,10 @@ In addition to EKS to manage the Kubernetes control plane, EC2 worker nodes are 
 * amazon-eks-node-1.12-v20190329 - ami-0abcb9f9190e867ab
 
 ##### 2. VPC CNI plugin
-* kubectl describe daemonset aws-node --namespace kube-system | grep Image | cut -d "/" -f 2
-* kubectl apply -f https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/master/config/v1.3/aws-k8s-cni.yaml
+```
+kubectl describe daemonset aws-node --namespace kube-system | grep Image | cut -d "/" -f 2
+kubectl apply -f https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/master/config/v1.3/aws-k8s-cni.yaml
+```
 
 ##### 3. Ingress Controller
 Kubernetes defines an ingress controller specification to allow Kubernetes managed services to be exposed as externally acceptable network endpoints.
@@ -50,11 +53,13 @@ Scales worker nodes within an AWS autoscaling group (ASG) or Spotinst Elastigrou
 RDS Aurora is preferred as a SQL datastore to leverage its horizontally scalable data tier and superior management features.
 
 ## IAM
+```
 aws iam create-role --role-name k8s-development-admin --cli-input-json file://k8s-development-admin.json
 aws iam put-role-policy --cli-input-json file://assume-self-policy.json
-
 kubectl -n kube-system get configmaps aws-auth -o yaml
+```
 ### Bastion Host
-
+```
 SSH_KEY="path/to/varMyKey.pem"; 
 ssh -i $SSH_KEY -L8080:<varMyElasticDomain>:80 -o ProxyCommand="ssh -i \"${SSH_KEY}\" ubuntu@<varMyBastionHostIp> nc %h %p" ubuntu@<varMyMasterNodeIp>
+```

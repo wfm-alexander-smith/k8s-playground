@@ -261,7 +261,7 @@ Resources:
 Outputs:
   HelmLambdaArn:
     Value: !GetAtt HelmLambda.Arn
-  BusyCloudStackMakerRoleArn:
+  BusyCloudStackMakerLambdaArn:
     Value: !GetAtt BusyCloudStackMakerLambda.Arn
   DeleteBucketContentsLambdaArn:
     Value: !If [ CreateDeleteBucketContentsLambda, !GetAtt DeleteBucketContentsLambda.Arn, "" ]

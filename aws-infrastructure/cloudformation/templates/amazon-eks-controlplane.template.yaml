@@ -32,7 +32,7 @@ Parameters:
     Default: ""
   KubernetesVersion:
     Type: String
-    AllowedValues: [ "1.11", "1.10" ]
+    AllowedValues: [ "1.12", "1.11", "1.10" ]
 Conditions:
   AddUsers: !Not [ !Equals [!Select [ 0, !Ref AdditionalEKSAdminArns ], ""] ]
 Resources:
