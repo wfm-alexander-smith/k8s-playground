@@ -10,12 +10,12 @@ aws s3 sync ./ s3://development-busycloud/assets
 ```
 - Create a stack with the master template
 ```
-aws cloudformation create-stack --stack-name "development-busycloud" --template-url https://s3.amazonaws.com/development-busycloud/assets/templates/amazon-eks-master.template.yaml --capabilities CAPABILITY_IAM --disable-rollback --parameters ParameterKey=AvailabilityZones,ParameterValue='us-east-1b\,us-east-1e\,us-east-1d' ParameterKey=RemoteAccessCIDR,ParameterValue=70.112.246.130/32 ParameterKey=KeyPairName,ParameterValue=busycloud-dev ParameterKey=QSS3BucketName,ParameterValue=development-busycloud ParameterKey=QSS3KeyPrefix,ParameterValue=assets\/ ParameterKey=Cluster,ParameterValue=development ParameterKey=Environment,ParameterValue=dev
+aws cloudformation create-stack --stack-name "development-busycloud" --template-url https://s3.amazonaws.com/development-busycloud/assets/templates/amazon-eks-master.template.yaml --capabilities CAPABILITY_IAM --disable-rollback --parameters ParameterKey=AvailabilityZones,ParameterValue='us-east-1b\,us-east-1e\,us-east-1d' ParameterKey=RemoteAccessCIDR,ParameterValue=70.112.246.130/32 ParameterKey=KeyPairName,ParameterValue=busycloud-dev ParameterKey=QSS3BucketName,ParameterValue=development-busycloud ParameterKey=QSS3KeyPrefix,ParameterValue=assets\/ ParameterKey=Cluster,ParameterValue=development ParameterKey=Environment,ParameterValue=dev  ParameterKey=NodeInstanceType,ParameterValue=m5.large
 
 ```
 ### Update Template
 ```
-aws cloudformation update-stack --stack-name "development-busycloud" --template-url https://s3.amazonaws.com/development-busycloud/assets/templates/amazon-eks-master.template.yaml --capabilities CAPABILITY_IAM --parameters ParameterKey=AvailabilityZones,ParameterValue='us-east-1b\,us-east-1e\,us-east-1d' ParameterKey=RemoteAccessCIDR,ParameterValue=70.112.246.130/32 ParameterKey=KeyPairName,ParameterValue=busycloud-dev ParameterKey=QSS3BucketName,ParameterValue=development-busycloud ParameterKey=QSS3KeyPrefix,ParameterValue=assets\/ ParameterKey=Cluster,ParameterValue=development ParameterKey=Environment,ParameterValue=dev
+aws cloudformation update-stack --stack-name "development-busycloud" --template-url https://s3.amazonaws.com/development-busycloud/assets/templates/amazon-eks-master.template.yaml --capabilities CAPABILITY_IAM --parameters ParameterKey=AvailabilityZones,ParameterValue='us-east-1b\,us-east-1e\,us-east-1d' ParameterKey=RemoteAccessCIDR,ParameterValue=70.112.246.130/32 ParameterKey=KeyPairName,ParameterValue=busycloud-dev ParameterKey=QSS3BucketName,ParameterValue=development-busycloud ParameterKey=QSS3KeyPrefix,ParameterValue=assets\/ ParameterKey=Cluster,ParameterValue=development ParameterKey=Environment,ParameterValue=dev ParameterKey=NodeInstanceType,ParameterValue=m5.large
 ```
 ### Deployed Resources
 
@@ -37,6 +37,11 @@ The alb-ingress-controller should be preffered as it is able to take advantage o
 
 ##### 4. [Helm](https://helm.sh/) Tiller
 Helm will be used to deploy each of the add-on Kubernetes services. Tiller is the back-end component of the Helm application package manager.
+```
+kubectl create serviceaccount tiller --namespace kube-system
+kubectl apply -f rbac-config.yaml
+helm init --service-account tiller
+```
 
 ##### 5. Kubernetes Dashboard
 Web UI used to browse Kubernetes namespaces and objects.
