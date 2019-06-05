@@ -8,12 +8,12 @@ Metadata:
         Parameters:
           - AvailabilityZones
           - VPCCIDR
-          - PrivateSubnet1CIDR
-          - PrivateSubnet2CIDR
-          - PrivateSubnet3CIDR
-          - PublicSubnet1CIDR
-          - PublicSubnet2CIDR
-          - PublicSubnet3CIDR
+          - PrivateSubnet1ID
+          - PrivateSubnet2ID
+          - PrivateSubnet3ID
+          - PublicSubnet1AID
+          - PublicSubnet2AID
+          - PublicSubnet3AID
           - RemoteAccessCIDR
       - Label:
           default: Amazon EC2 configuration
@@ -24,6 +24,8 @@ Metadata:
         Parameters:
           - NodeInstanceType
           - NumberOfNodes
+          - MinNumberOfNodes
+          - MaxNumberOfNodes
           - NodeGroupName
           - NodeVolumeSize
           - AdditionalEKSAdminArns
@@ -43,45 +45,49 @@ Metadata:
       AvailabilityZones:
         default: Availability Zones
       KeyPairName:
-        default: SSH key name
-      PrivateSubnet1CIDR:
-        default: Private subnet 1 CIDR
-      PrivateSubnet2CIDR:
-        default: Private subnet 2 CIDR
-      PrivateSubnet3CIDR:
-        default: Private subnet 3 CIDR
-      PublicSubnet1CIDR:
-        default: Public subnet 1 CIDR
-      PublicSubnet2CIDR:
-        default: Public subnet 2 CIDR
-      PublicSubnet3CIDR:
-        default: Public subnet 3 CIDR
+        Description: The name of an existing public/private key pair, which allows you to securely connect to your instance after it launches
+      PrivateSubnet1AID:
+        Description: Private 'a' Subnet ID for the Resources
+      PrivateSubnet2AID:
+        Description: Private 'b' Subnet ID for the Resources      
+      PrivateSubnet3AID:
+        Description: Private 'c' Subnet ID for the Resources
+      PublicSubnet1ID:
+        Description: public 'a' Subnet ID for the Resources
+      PublicSubnet2ID:
+        Description: public 'b' Subnet ID for the Resources
+      PublicSubnet3ID:
+        Description: public 'c' Subnet ID for the Resources
       QSS3BucketName:
-        default: BusyCloud S3 bucket name
+        Description: BusyCloud S3 bucket name
       QSS3KeyPrefix:
-        default: BusyCloud S3 key prefix
+        Description: BusyCloud S3 key prefix
       Cluster:
-        default: BusyCloud target EKS cluster
+        Description: BusyCloud target EKS cluster
       Environment:
-        default: BusyCloud application target runtime environment
+        Description: BusyCloud application target runtime environment
       RemoteAccessCIDR:
-        default: Allowed external access CIDR
-      VPCCIDR:
-        default: VPC CIDR
+        Description: Allowed external access CIDR
+      VPCID:
+        Description: The VPC ID for the Resources created in Stack
       NodeInstanceType:
-        default: Nodes instance type
+        Description: Nodes instance type
       NumberOfNodes:
-        default: Number of nodes
+        Description: Number of worker nodes
+      MinNumberOfNodes:
+        Description: Minimum number of worker nodes for the auto-scaling group
+      MaxNumberOfNodes:
+        Description: Maximum number of worker nodes for the auto-scaling group
       NodeGroupName:
-        default: Node group name
+        Description: Node group name
       NodeVolumeSize:
-        default: Node volume size
+        Description: Node volume size
       AdditionalEKSAdminArns:
-        default: Additional EKS admin ARNs
+        Description: Additional EKS admin ARNs
       KubernetesVersion:
-        default: Kubernetes version
+        Description: Kubernetes version
       LambdaZipsBucketName:
-        default: Lambda zips bucket name
+        Description: Lambda zips bucket name
 Parameters:
   Cluster:
     Type: String
@@ -98,51 +104,29 @@ Parameters:
     Description: The name of an existing public/private key pair, which allows you
       to securely connect to your instance after it launches
     Type: AWS::EC2::KeyPair::KeyName
-  PrivateSubnet1CIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
-    Default: 10.0.0.0/19
-    Description: The CIDR block for private subnet 1 located in Availability Zone 1
-    Type: String
-  PrivateSubnet2CIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
-    Default: 10.0.32.0/19
-    Description: The CIDR block for private subnet 2 located in Availability Zone 2
-    Type: String
-  PrivateSubnet3CIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
-    Default: 10.0.64.0/19
-    Description: The CIDR block for private subnet 3 located in Availability Zone 3
-    Type: String
-  PublicSubnet1CIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
-    Default: 10.0.128.0/20
-    Description: CIDR block for the public (DMZ) subnet 1 located in Availability
-      Zone 1
-    Type: String
-  PublicSubnet2CIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
-    Default: 10.0.144.0/20
-    Description: The CIDR block for the public (DMZ) subnet 2 located in Availability
-      Zone 2
-    Type: String
-  PublicSubnet3CIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
-    Default: 10.0.160.0/20
-    Description: The CIDR block for the public (DMZ) subnet 3 located in Availability
-      Zone 3
-    Type: String
+  PrivateSubnet1AID:
+    Description: Private 'a' Subnet ID for the Resources
+    Type: 'AWS::EC2::Subnet::Id'
+  PrivateSubnet2AID:
+    Description: Private 'b' Subnet ID for the Resources
+    Type: 'AWS::EC2::Subnet::Id'
+  PrivateSubnet3AID:
+    Description: Private 'c' Subnet ID for the Resources
+    Type: 'AWS::EC2::Subnet::Id'
+  PublicSubnet1ID:
+    Description: public 'a' Subnet ID for the Resources
+    Type: 'AWS::EC2::Subnet::Id'
+  PublicSubnet2ID:
+    Description: public 'b' Subnet ID for the Resources
+    Type: 'AWS::EC2::Subnet::Id'
+  PublicSubnet3ID:
+    Description: public 'c' Subnet ID for the Resources
+    Type: 'AWS::EC2::Subnet::Id'
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: BusyCloud bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: wfm-pricer-central
     Description: S3 bucket name for the BusyCloud assets. This string can include
       numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
       or end with a hyphen (-).
@@ -162,12 +146,9 @@ Parameters:
     Description: The CIDR IP range that is permitted to access the instances We recommend
       that you set this value to a trusted IP range.
     Type: String
-  VPCCIDR:
-    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
-    Default: 10.0.0.0/16
-    Description: The CIDR block for the VPC
-    Type: String
+  VPCID:
+    Description: The VPC ID for the Resources created in Stack
+    Type: 'AWS::EC2::VPC::Id'
   AdditionalEKSAdminArns:
     Default: ""
     Description: "[OPTIONAL] Comma separated list of IAM user/role Amazon Resource Names (ARNs) to be granted admin access to the EKS cluster"
@@ -260,7 +241,15 @@ Parameters:
     Type: String
   NumberOfNodes:
     Default: 3
-    Description: The number of Amazon EKS node instances. The default is one for each of the three Availability Zones.
+    Description: The number of Amazon EKS worker node instances. The default is one for each of the three Availability Zones.
+    Type: Number
+  MinNumberOfNodes:
+    Default: 3
+    Description: The minimum number of Amazon EKS worker node instances. The default is one for each of the three Availability Zones.
+    Type: Number
+  MaxNumberOfNodes:
+    Default: 3
+    Description: The maximun number of Amazon EKS worker node instances. The default is one for each of the three Availability Zones.
     Type: Number
   NodeGroupName:
     Default: Default
@@ -279,6 +268,9 @@ Parameters:
     Description: '[OPTIONAL] The name of the S3 bucket where the Lambda .zip files should be placed. If you leave this parameter blank, an S3 bucket will be created.'
     Type: String
     Default: ''
+Conditions:
+  MaxNodes: !Not [ !Equals [ !Ref MaxNumberOfNodes, "" ] ]
+  MinNodes: !Not [ !Equals [ !Ref MinNumberOfNodes, "" ] ]
 Rules:
   EKSSupport:
     Assertions:
@@ -299,23 +291,23 @@ Rules:
              - ap-south-1
           - !Ref 'AWS::Region'
 Resources:
-  VPCStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-vpc.template.yaml'
-      Parameters:
-        AvailabilityZones: !Join [ ',', !Ref 'AvailabilityZones' ]
-        KeyPairName: !Ref 'KeyPairName'
-        NumberOfAZs: '3'
-        PrivateSubnet1ACIDR: !Ref 'PrivateSubnet1CIDR'
-        PrivateSubnet2ACIDR: !Ref 'PrivateSubnet2CIDR'
-        PrivateSubnet3ACIDR: !Ref 'PrivateSubnet3CIDR'
-        PrivateSubnetATag2: "kubernetes.io/role/internal-elb="
-        PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
-        PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
-        PublicSubnet3CIDR: !Ref 'PublicSubnet3CIDR'
-        PublicSubnetTag2: "kubernetes.io/role/elb="
-        VPCCIDR: !Ref 'VPCCIDR'
+  # VPCStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-vpc.template.yaml'
+  #     Parameters:
+  #       AvailabilityZones: !Join [ ',', !Ref 'AvailabilityZones' ]
+  #       KeyPairName: !Ref 'KeyPairName'
+  #       NumberOfAZs: '3'
+  #       PrivateSubnet1ACIDR: !Ref 'PrivateSubnet1CIDR'
+  #       PrivateSubnet2ACIDR: !Ref 'PrivateSubnet2CIDR'
+  #       PrivateSubnet3ACIDR: !Ref 'PrivateSubnet3CIDR'
+  #       PrivateSubnetATag2: "kubernetes.io/role/internal-elb="
+  #       PublicSubnet1CIDR: !Ref 'PublicSubnet1CIDR'
+  #       PublicSubnet2CIDR: !Ref 'PublicSubnet2CIDR'
+  #       PublicSubnet3CIDR: !Ref 'PublicSubnet3CIDR'
+  #       PublicSubnetTag2: "kubernetes.io/role/elb="
+  #       VPCCIDR: !Ref 'VPCCIDR'
   EKSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -323,24 +315,25 @@ Resources:
       Parameters:
         Cluster: !Ref Cluster
         Environment: !Ref 'Environment'
-        PublicSubnet1ID: !GetAtt VPCStack.Outputs.PublicSubnet1ID
-        PublicSubnet2ID: !GetAtt VPCStack.Outputs.PublicSubnet2ID
-        PublicSubnet3ID: !GetAtt VPCStack.Outputs.PublicSubnet3ID
+        PublicSubnet1ID: !Ref PublicSubnet1ID
+        PublicSubnet2ID: !Ref PublicSubnet2ID
+        PublicSubnet3ID: !Ref PublicSubnet3ID
         KeyPairName: !Ref KeyPairName
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        PrivateSubnet1ID: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-        PrivateSubnet2ID: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
-        PrivateSubnet3ID: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+        PrivateSubnet1ID: !Ref PrivateSubnet1AID
+        PrivateSubnet2ID: !Ref PrivateSubnet2AID
+        PrivateSubnet3ID: !Ref PrivateSubnet3AID
         NumberOfNodes: !Ref NumberOfNodes
-        MaxNumberOfNodes: !Ref NumberOfNodes
+        MinNumberOfNodes: !If [ MinNodes, !Ref MinNumberOfNodes, !Ref NumberOfNodes ]
+        MaxNumberOfNodes: !If [ MaxNodes, !Ref MaxNumberOfNodes, !Ref NumberOfNodes ]
         NodeGroupName: !Ref NodeGroupName
         NodeVolumeSize: !Ref NodeVolumeSize
         LambdaZipsBucketName: !Ref LambdaZipsBucketName
         NodeInstanceType: !Ref NodeInstanceType
         RemoteAccessCIDR: !Ref RemoteAccessCIDR
         AdditionalEKSAdminArns: !Join [ ",", !Ref AdditionalEKSAdminArns ]
-        VPCID: !GetAtt VPCStack.Outputs.VPCID
+        VPCID: !Ref VPCID
         KubernetesVersion: !Ref KubernetesVersion
         ProvisionClusterAutoScaler: Enabled
         BastionInstanceType: t2.small
@@ -350,13 +343,27 @@ Resources:
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/amazon-aurora.template.yaml'
       Parameters:
         AvailabilityZones: !Join [ ',', !Ref 'AvailabilityZones' ]
-        PrivateSubnet1ID: !GetAtt VPCStack.Outputs.PrivateSubnet1AID
-        PrivateSubnet2ID: !GetAtt VPCStack.Outputs.PrivateSubnet2AID
-        PrivateSubnet3ID: !GetAtt VPCStack.Outputs.PrivateSubnet3AID
+        PrivateSubnet1ID: !Ref PrivateSubnet1AID
+        PrivateSubnet2ID: !Ref PrivateSubnet2AID
+        PrivateSubnet3ID: !Ref PrivateSubnet3AID
         EKSNodeSecurityGroup: !GetAtt EKSStack.Outputs.EKSNodeSecurityGroup
-        VPCID: !GetAtt VPCStack.Outputs.VPCID
+        BastionSecurityGroup: !GetAtt EKSStack.Outputs.BastionSecurityGroup
+        VPCID: !Ref VPCID
         Cluster: !Ref Cluster
         Environment: !Ref Environment
+  PricerCentralStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/pricer-central.template.yaml'
+      Parameters:
+        KubeConfigPath: !GetAtt EKSStack.Outputs.KubeConfigPath
+        KubeConfigKmsContext: !GetAtt EKSStack.Outputs.KubeConfigKmsContext
+        KubeManifestLambdaArn: !GetAtt EKSStack.Outputs.KubeManifestLambdaArn
+        HelmLambdaArn: !GetAtt EKSStack.Outputs.HelmLambdaArn
+        Cluster: !Ref 'Cluster'
+        Environment: !Ref 'Environment'
+        DbUsername: !Join ['', ['{{resolve:secretsmanager:', !GetAtt DatabaseStack.Outputs.DBRDSSecret, ':SecretString:username}}' ]]
+        DbPassword: !Join ['', ['{{resolve:secretsmanager:', !GetAtt DatabaseStack.Outputs.DBRDSSecret, ':SecretString:password}}' ]]
 Outputs:
   KubeConfigPath:
     Value: !GetAtt EKSStack.Outputs.KubeConfigPath
